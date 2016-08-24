@@ -1,0 +1,1 @@
+window.onload=function(){var n=document.getElementsByTagName("img");n[0].onclick=function(){alert("hello gulp!")}};

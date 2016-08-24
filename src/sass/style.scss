@@ -1,0 +1,26 @@
+@import 'normalize';
+@import 'compass';
+
+body{
+	margin: 0;
+	background: darken(#fff,10%)
+}
+$color: #f30;
+h1{
+	text-align: center;
+	color:$color;
+	background: darken(#fff,20%);
+}
+a{
+	text-decoration: none;
+	&:hover{
+		text-decoration: underline;
+	}
+}
+div{
+	text-align: center;
+	cursor: pointer;
+}
+ul li{
+	@include inline-block;
+}
