@@ -1,0 +1,23 @@
+{
+  "name": "react-gulp-browserify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "browerify"
+  ],
+  "author": "transform",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^13.1.0",
+    "gulp": "^3.9.1",
+    "react": "^15.3.2",
+    "react-tools": "^0.13.3",
+    "reactify": "^1.1.1",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
