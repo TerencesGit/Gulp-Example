@@ -1,0 +1,14 @@
+h1 {
+  color: #f30;
+  background: #ccc;
+}
+
+.list {
+  display: inline-block;
+  vertical-align: middle;
+  *vertical-align: auto;
+  *zoom: 1;
+  *display: inline;
+}
+
+

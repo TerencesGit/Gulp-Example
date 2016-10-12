@@ -1,0 +1,11 @@
+@import 'compass';
+$width: 600px;
+$color: #f30;
+$bg: #ccc;
+h1{
+	color: $color;
+	background: $bg
+}
+.list {
+	@include inline-block;
+}
