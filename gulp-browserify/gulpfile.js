@@ -1,4 +1,4 @@
-
+"use strict";
 var gulp = require('gulp'),
 		browserSync = require('browser-sync'),
 		browserify = require('browserify'),
@@ -14,19 +14,51 @@ var gulp = require('gulp'),
 		concat = require('gulp-concat'),
 		clean = require('gulp-clean'),
 		runSequence = require('gulp-run-sequence'),
-	  config = require('./config');		
-
+		babel = require('gulp-babel');	
+var config = {
+	paths: {
+		html: './src/html/**/*',
+		sass: './src/sass/*.scss',
+		 css: './dist/static/css',
+		  js: './dist/static/js'
+	}
+}
+//html
 gulp.task('html',function(){
-	gulp.src('src/views/**/*')
+	gulp.src(config.paths.html)
 			.pipe(gulp.dest('dist/'))
 })
+// compile css
+gulp.task('sass',function(){
+	var filter = gulpFilter(['*.css','!*.map'],{restore: true});
+	return sass(config.paths.sass, {
+						//compass: true,
+						noCache: true,
+						sourcemap: true,
+						style: 'expanded'
+					})
+					.on('error', sass.logError)
+					.pipe(plumber())
+					.pipe(sourcemaps.init())
+					.pipe(autoprefixer({
+						browsers: ['last 2 versions'],
+						cascade: true,
+						remove: true
+					}))
+					.pipe(filter)
+					.pipe(sourcemaps.write('.',{includeContent: false,sourceRoot: './src/sass'}))
+					.pipe(filter.restore)
+					.pipe(gulp.dest(config.paths.css))
+})
+//browserify Single
 gulp.task('browserify', function(){
 	return browserify({entries: ['./src/js/main.js']})
 				 .bundle()
-				 .pipe(source('main.boundle.js'))
-				 .pipe(gulp.dest('./dist/js/'))					
+				 .pipe(source('main.bundle.js'))
+				 .pipe(gulp.dest('./dist/static/js/'))					
 })
-gulp.task('browser', function(done){
+//browserify  Multiple 
+gulp.task('bundles', function(done){
 	glob('./src/js/main-**.js', function(err, files){
 		if(err) done(err);
 		var tasks = files.map(function(entry){
@@ -36,7 +68,7 @@ gulp.task('browser', function(done){
 						 .pipe(rename({
 						 	extname: '.bound.js'
 						 }))
-						 .pipe(gulp.dest('./dist/'))
+						 .pipe(gulp.dest('./dist'))
 		})
 		eventStream.merge(tasks).on('end',done)
 	})
@@ -44,49 +76,38 @@ gulp.task('browser', function(done){
 gulp.task('concat', function(){
 	gulp.src('./dist/src/js/*.js')
 			.pipe(concat('main.js'))
-			.pipe(gulp.dest('./dist/static/js'))
+			.pipe(gulp.dest(config.paths.js))
 })
 gulp.task('clean',function(){
 	return gulp.src('./dist/src')
-						  .pipe(clean())
+						 .pipe(clean())
 })
-gulp.task('js',function(){
-	runSequence('browser','concat','clean')
+gulp.task('babel',function(){
+	gulp.src('./dist/static/js/main.bundle.js')
+			.pipe(babel({
+				presets: ['es2015']
+			}))
+			.pipe(gulp.dest('./dist/static/js'))
 })
-gulp.task('sass', function(){
-	var sassConfig = config.sass.options;
-	sassConfig.onErrer = browserSync.notify;
-	var filter = gulpFilter(['*.css','!*.map'],{restore: true});
-	browserSync.notify('Compling Sass');
-	return sass(config.sass.src, sassConfig)
-					.pipe(plumber())
-					.pipe(sourcemaps.init())
-					.pipe(autoprefixer(config.autoprefixer))
-					.pipe(filter)
-					.pipe(sourcemaps.write('.',{includeContent: false,sourceRoot: './src/sass'}))
-					.pipe(filter.restore)
-					.pipe(gulp.dest(config.sass.dest))
+// gulp.task('js', function(){
+// 	runSequence('bundles','concat','clean','babel')
+// })
+gulp.task('script', function(){
+	runSequence('browserify','babel')
 })
-gulp.task('css',function(){
-	return sass('./src/sass/*.scss',{
-							sourcemap: true,
-							noCache: true,
-							compass: true,
-							style: 'compressed'
-						})
-						//.on('error', sass.logError)
-						.pipe(gulp.dest('./dist/css'))	
-})
-gulp.task('build',['html','sass','js'])
-gulp.task('browserSync', ['build'],function(){
-	browserSync(config.browsersync.develpment)
-})
+
+gulp.task('build',['html','sass','script'])
+
 gulp.task('reload',function(){
 	browserSync.reload()
 })
-gulp.task('watch',['browserSync'],function(){
-	gulp.watch('./src/*.html',['html','reload']);
+gulp.task('serve', ['build'],function(){
+	browserSync.init({
+		server: './dist'
+	})
+	gulp.watch('./src/html/**/*.html',['html','reload']);
 	gulp.watch('./src/sass/*.scss',['sass','reload']);
-	gulp.watch('./src/js/*.js',['browserify','reload']);
+	gulp.watch('./src/js/*.js',['script','reload']);
 })
-gulp.task('default',['watch'])
+
+gulp.task('default',['serve'])

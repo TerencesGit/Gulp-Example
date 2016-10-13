@@ -1,11 +1,14 @@
-@import 'compass';
+//@import 'normalize';
+// @import 'compass';
+
 $width: 600px;
-$color: #f30;
+$color: #f60;
 $bg: #ccc;
 h1{
 	color: $color;
-	background: $bg
+	background: $bg;
+	// transform: rotate(-5deg) translateY(50px)
 }
-.list {
-	@include inline-block;
-}
+// .list {
+// 	@include inline-block;
+// }
